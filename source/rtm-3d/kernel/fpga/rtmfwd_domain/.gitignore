@@ -1,0 +1,15 @@
+debug/
+debug/*
+output/
+output/*
+build/*
+build/
+bin/
+xclbin/
+.Xil/
+*.xclbin
+*.xo
+*.log
+*.bin
+*.txt
+

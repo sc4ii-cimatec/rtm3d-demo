@@ -1,0 +1,11 @@
+bin/
+data/
+build/
+velmodels/
+__tests__
+.vscode
+*.log
+*.7z
+*.zip
+*.bin
+*.tar.xz

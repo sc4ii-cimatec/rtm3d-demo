@@ -1,0 +1,12 @@
+debug/
+debug/*
+output/
+output/*
+build/*
+build/
+bin/
+*.xclbin
+*.xo
+*.log
+*.bin
+
