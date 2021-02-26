@@ -1,3 +1,4 @@
+<img src="img/banner-xilinx-senai.png" width="600" alt="Cimatec/Xilinx Logo (107x107x2368)">
 # **RTM3D-SW: Accelerating Seismic Modeling with Alveo U280 FPGA**
 
 Reverse Time Migration (RTM) is an imaging technique widely used in the Oil&Gas industry as part of their Seismic Survey workflows. A Seismic Survey is a "method of investigating subterranean structures, particularly as related to exploration for petroleum, natural gas, and mineral deposits."[1].  A Seismic Survey has two main components: 
