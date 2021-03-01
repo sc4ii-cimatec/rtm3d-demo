@@ -148,9 +148,9 @@ We have compared the execution time of the Seismic Modeling process using a sing
 > 			L1i cache:             32K
 > 			L2 cache:              1024K
 > 			L3 cache:              25344K
-> 			Interconnect: 		   InfiniBand
-> 			RAM: 		   		   376 GB
-> 			Distributed FS: 	   Lustre
+> 			Interconnect:	       InfiniBand
+> 			RAM: 	               376 GB
+> 			Distributed FS:        Lustre
 
 
 We measured time execution time for each MPI run and plotted the results in Figure 2.
