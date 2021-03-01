@@ -8,6 +8,7 @@ help(){
     echo ">        --json=<input.json>"
     echo ">        --build=<y=build|Y=clean and build|n= don't build>"
     echo ">        --nproc=N, where N is the number of MPI processes)"
+    echo ">        --xclbin=<path_to_xclbin>."
     exit 1
 }
 
