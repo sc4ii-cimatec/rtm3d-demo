@@ -89,11 +89,16 @@ float randparabolicval(float v, float maxvel, float minvel, int dist, int range)
 }
 
 float randlinearval(float v, int k, int nkb){
+	float vrand = v;
+	float dist = k*1.0;
+	float range = nkb*1.0;
+	float perc = (dist/range)*100;
+	float seed = (rand()%100)*1.0;
 	
-	float v_ave = 0, l_lim = 300., delta = 200., vrand=0;
-	v_ave = v - (v - l_lim) * (k) / (nkb - 1);
-	int d = (int)(v + delta - (v_ave - delta) + 1) + v_ave - delta;
-	vrand = rand()%d;
+	if (seed < perc && perc>70.){
+		
+		vrand = v*(1.0/perc) + v*(seed/100.0);
+	}
 	return vrand;
 }
 

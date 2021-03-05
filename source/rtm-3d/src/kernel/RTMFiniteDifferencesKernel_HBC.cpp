@@ -80,9 +80,11 @@ void RTMHBCKernel::rtmMigrate(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &shotDes
 
     KERNEL_STATE = RTMKernelState::RTM_KERNEL_STATE_BACKWARD;
 
+#ifdef RTM_ACC_FPGA
     /**!!!! Set CPU Platform for Backward Propagation !!!!**/
     setCpuPlatform();
     /**!!!! Set CPU Platform for Backward Propagation !!!!**/
+#endif
 
     rtmHBCBackward(shotDescriptor, v2dt2Grid);
     KERNEL_STATE = RTMKernelState::RTM_KERNEL_STATE_IDLE;
@@ -159,11 +161,14 @@ void RTMHBCKernel::rtmHBCForward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &shot
             // apply source
             defaultPlatform->rtmApplySource(ppSrcGrid, shotDescriptor.getSource(), it);
 
+            // join all distributed grids, if any.
+            joinDistributedPSGrids();
+
             // save upper border
             defaultPlatform->rtmSaveUpperBorder(ppSrcGrid, upbGrid, lt);
 
             // update snapshots file
-            if (rtmParam->save_snapshots && (it % rtmParam->snapshot_step) == 0)
+            if (rtmParam->save_snapshots && (it % rtmParam->snapshot_step) == 0 && processRank==0)
             {
                 /* For now, snapshots are always on X dimension*/
                 if (isUsingAcc()){
@@ -173,8 +178,6 @@ void RTMHBCKernel::rtmHBCForward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &shot
                 secGrid->appendTofile(snapshotsFile);
                 delete secGrid;
             }
-            // join all distributed grids, if any.
-            joinDistributedPSGrids();
 
             // print kernel progress...
             sprintf(pmsg, "+[P%d] HBC_FWD", processLimits.pRank);
@@ -317,6 +320,10 @@ void RTMHBCKernel::rtmHBCBackward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &sho
             report->propagFuncTime += elapsed_s(t1, toc());
             report->propagFuncCounter++;
 
+            // join distributed PS and PR grids, if any.
+            joinDistributedPSGrids();
+            joinDistributedPRGrids();
+
             // restore receiver energy
             defaultPlatform->rtmRestoreReceiverData(ppRcvGrid, rcvGrid, lt);
 
@@ -324,7 +331,7 @@ void RTMHBCKernel::rtmHBCBackward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &sho
             defaultPlatform->rtmImageCondition(imgGrid, pSrcGrid, ppRcvGrid);
 
             // update snapshots file
-            if (rtmParam->save_snapshots && (it % rtmParam->snapshot_step) == 0)
+            if (rtmParam->save_snapshots && (it % rtmParam->snapshot_step) == 0 && processRank==0)
             {
                 if (isUsingAcc()){
                     ppRcvGrid->moveFromDevice();
@@ -337,10 +344,6 @@ void RTMHBCKernel::rtmHBCBackward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &sho
             // swap receiver pointers
             RTMGRID_SWAP(&pRcvGrid, &ppRcvGrid);
             
-            // join distributed PS and PR grids, if any.
-            joinDistributedPSGrids();
-            joinDistributedPRGrids();
-
             // print kernel progress;
             sprintf(pmsg, "+[P%d] HBC_BWD", processLimits.pRank);
             printKernelProgress(pmsg, sx, sy, sz, nt - it, nt, elapsed_s(t0, toc()));

@@ -180,11 +180,11 @@ void  RTMDistributedGridKernel::recvGridGhostZone(RTMGhostZone &gZone, RTMCube<R
 }
 
 void  RTMDistributedGridKernel::sendGridGhostZone(RTMGhostZone &gZone, int reqRank, 
-RTMCube<RTMData_t, RTMDevPtr_t> *pGrid, int MPI_GRID_TAG){
+RTMCube<RTMData_t, RTMDevPtr_t> *lGrid, int MPI_GRID_TAG){
 #ifdef RTM_MPI
     int ix, iy, iz, ik;
     MPI_Status mpiStatus;
-    int len = (gZone.gLimits.xEnd-gZone.gLimits.xStart)*(gZone.gLimits.yEnd-gZone.gLimits.yStart)*pGrid->getNZ();
+    int len = (gZone.gLimits.xEnd-gZone.gLimits.xStart)*(gZone.gLimits.yEnd-gZone.gLimits.yStart)*lGrid->getNZ();
     if (len<=0){
         string s("[ GhostZone Limits Error ]");
         RTMException ex(s);
@@ -194,8 +194,8 @@ RTMCube<RTMData_t, RTMDevPtr_t> *pGrid, int MPI_GRID_TAG){
     RTMData_t * gData = new RTMData_t[gZone.gLength];
     for(ix=gZone.gLimits.xStart; ix<gZone.gLimits.xEnd; ix++){
         for(iy=gZone.gLimits.yStart; iy<gZone.gLimits.yEnd; iy++){
-            for(iz=0; iz<pGrid->getNZ(); iz++){
-                gData[ik] = pGrid->getWithGlobalCoordinate(ix,iy,iz);
+            for(iz=0; iz<lGrid->getNZ(); iz++){
+                gData[ik] = lGrid->getWithGlobalCoordinate(ix,iy,iz);
                 ik++;
             }
         }
@@ -205,16 +205,16 @@ RTMCube<RTMData_t, RTMDevPtr_t> *pGrid, int MPI_GRID_TAG){
 #endif
 }
 
-void  RTMDistributedGridKernel::requestGhostZone(RTMGhostZone &gZone, RTMCube<RTMData_t, RTMDevPtr_t> *pGrid)
+void  RTMDistributedGridKernel::requestGhostZone(RTMGhostZone &gZone, RTMCube<RTMData_t, RTMDevPtr_t> *lGrid)
 {
 #ifdef RTM_MPI
     int vec[4] = {gZone.gLimits.xStart, gZone.gLimits.xEnd, gZone.gLimits.yStart, gZone.gLimits.yEnd};
     MPI_Send(vec, 4, MPI_INT, gZone.remoteOwnerProcess, RTM_MPI_REQ_GZONE, MPI_COMM_WORLD);
-    recvGridGhostZone(gZone, pGrid, RTM_MPI_RCV_GZONE);
+    recvGridGhostZone(gZone, lGrid, RTM_MPI_RCV_GZONE);
 #endif
 }
 
-void RTMDistributedGridKernel::answerGhostZoneRequest(RTMCube<RTMData_t, RTMDevPtr_t> *pGrid)
+void RTMDistributedGridKernel::answerGhostZoneRequest(RTMCube<RTMData_t, RTMDevPtr_t> *lGrid)
 {
 #ifdef RTM_MPI
     MPI_Status mpiStatus;
@@ -229,15 +229,15 @@ void RTMDistributedGridKernel::answerGhostZoneRequest(RTMCube<RTMData_t, RTMDevP
     gZone.gLimits.xEnd = vec[1];
     gZone.gLimits.yStart = vec[2];
     gZone.gLimits.yEnd = vec[3];
-    gZone.gLength = (gZone.gLimits.xEnd - gZone.gLimits.xStart) * (gZone.gLimits.yEnd - gZone.gLimits.yStart) * pGrid->getNZ();
+    gZone.gLength = (gZone.gLimits.xEnd - gZone.gLimits.xStart) * (gZone.gLimits.yEnd - gZone.gLimits.yStart) * lGrid->getNZ();
     int requesterRank = mpiStatus.MPI_SOURCE;
 
-    sendGridGhostZone(gZone, requesterRank, pGrid, RTM_MPI_RCV_GZONE);
+    sendGridGhostZone(gZone, requesterRank, lGrid, RTM_MPI_RCV_GZONE);
 
 #endif
 }
 
-void RTMDistributedGridKernel::rtmSynchDistributedGrid(RTMCube<RTMData_t, RTMDevPtr_t> *pGrid)
+void RTMDistributedGridKernel::rtmSynchDistributedGrid(RTMCube<RTMData_t, RTMDevPtr_t> *lGrid)
 {
 #ifdef RTM_MPI
     if(nProcesses==1){
@@ -261,7 +261,7 @@ void RTMDistributedGridKernel::rtmSynchDistributedGrid(RTMCube<RTMData_t, RTMDev
                 {
                     // request remote ghost zone
                     //printf("> P[%d.%d]-->P[%d] (Z%d) \n", processRank, tid, processLimits.gzone[i0].remoteOwnerProcess, i0); fflush(stdout);
-                    requestGhostZone(processLimits.gzone[i0], pGrid);
+                    requestGhostZone(processLimits.gzone[i0], lGrid);
                     //printf("< P[%d.%d]<--P[%d] (Z%d) \n", processRank, tid, processLimits.gzone[i0].remoteOwnerProcess, i0); fflush(stdout);
                 }
             }
@@ -271,7 +271,7 @@ void RTMDistributedGridKernel::rtmSynchDistributedGrid(RTMCube<RTMData_t, RTMDev
             {
                 // waits for remoze gzone request
                 //printf(">> P[%d.%d]: wait=%d/%d \n", processRank, tid, j0, validZones); fflush(stdout);
-                answerGhostZoneRequest(pGrid);
+                answerGhostZoneRequest(lGrid);
             }
             //printf(">> P[%d.%d]: done=%d/%d \n", processRank, tid, validZones, validZones); fflush(stdout);
         }

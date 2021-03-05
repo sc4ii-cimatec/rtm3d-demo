@@ -107,16 +107,15 @@ void RTMAcousticController::rtmSerialMigration()
         }
     }
     rtmKernel->destroyKernel();
-    rtmOutputImage->removeBorders(rtmParam->blen);
-
-    // save shot output image
-    string imgFile;
     // filter first
     RTM_PRINT("Applying Laplacian Filter to output image... ", rtmParam->verbose);
     RTMData_t derivativesVec[] = {rtmParam->dx,rtmParam->dy,rtmParam->dz};
     RTMStencil<RTMData_t,RTMDevPtr_t, RTM_NDIM_3D> fkernel(RTM_LAPFILTER_ORDER,derivativesVec);
-    
     rtmOutputImage->filter(fkernel);
+    rtmOutputImage->removeBorders(rtmParam->blen);
+
+    // save shot output image
+    string imgFile;
     RTM_MIGIMG_NAME(imgFile, rtmParam->outdir, rtmParam->mname,
                     rtmParam->source_count_x*rtmParam->source_count_y, rtmParam->nx,
                     rtmParam->ny, rtmParam->nz, rtmParam->nt, processLimits.nProcesses);
@@ -242,6 +241,11 @@ void RTMAcousticController::rtmDistShotMigration()
     rtmKernel->getReport().mpiFuncCounter++;
 #endif
     rtmKernel->destroyKernel();
+    // filter first
+    RTM_PRINT("Applying Laplacian Filter to output image... ", rtmParam->verbose);
+    RTMData_t derivativesVec[] = {rtmParam->dx,rtmParam->dy,rtmParam->dz};
+    RTMStencil<RTMData_t,RTMDevPtr_t, RTM_NDIM_3D> fkernel(RTM_LAPFILTER_ORDER,derivativesVec);
+    rtmOutputImage->filter(fkernel);
     rtmOutputImage->removeBorders(rtmParam->blen);
 
     // save shot output image
@@ -249,12 +253,6 @@ void RTMAcousticController::rtmDistShotMigration()
 #ifdef RTM_MPI
     imgFile += ".NP"+to_string(nProcesses);
 #endif 
-    // filter first
-    RTM_PRINT("Applying Laplacian Filter to output image... ", rtmParam->verbose);
-    RTMData_t derivativesVec[] = {rtmParam->dx,rtmParam->dy,rtmParam->dz};
-    RTMStencil<RTMData_t,RTMDevPtr_t, RTM_NDIM_3D> fkernel(RTM_LAPFILTER_ORDER,derivativesVec);
-    rtmOutputImage->filter(fkernel);
-
     RTM_MIGIMG_NAME(imgFile, rtmParam->outdir, rtmParam->mname,
                     rtmParam->source_count_x*rtmParam->source_count_y, rtmParam->nx,
                     rtmParam->ny, rtmParam->nz, rtmParam->nt, nProcesses);
@@ -372,7 +370,13 @@ void RTMAcousticController::rtmDistGridMigration()
     rtmKernel->getReport().mpiFuncTime += elapsed_s(t0,tic());
     rtmKernel->getReport().mpiFuncCounter++;
 #endif
-    rtmKernel->destroyKernel(); 
+    rtmKernel->destroyKernel();
+    
+    // filter first
+    RTM_PRINT("Applying Laplacian Filter to output image... ", rtmParam->verbose);
+    RTMData_t derivativesVec[] = {rtmParam->dx,rtmParam->dy,rtmParam->dz};
+    RTMStencil<RTMData_t,RTMDevPtr_t, RTM_NDIM_3D> fkernel(RTM_LAPFILTER_ORDER,derivativesVec);
+    rtmOutputImage->filter(fkernel);
     rtmOutputImage->removeBorders(rtmParam->blen);
 
     // save shot output image
@@ -381,13 +385,7 @@ void RTMAcousticController::rtmDistGridMigration()
 #ifdef RTM_MPI
     MPI_Comm_size(MPI_COMM_WORLD, &nProcesses);
     imgFile += ".NP"+to_string(nProcesses);
-#endif 
-    RTM_PRINT("Applying Laplacian Filter to output image... ", rtmParam->verbose);
-    // filter first
-    RTMData_t derivativesVec[] = {rtmParam->dx,rtmParam->dy,rtmParam->dz};
-    RTMStencil<RTMData_t,RTMDevPtr_t, RTM_NDIM_3D> fkernel(RTM_LAPFILTER_ORDER,derivativesVec);
-    rtmOutputImage->filter(fkernel);
-
+#endif
     RTM_MIGIMG_NAME(imgFile, rtmParam->outdir, rtmParam->mname,
                     rtmParam->source_count_x*rtmParam->source_count_y, rtmParam->nx,
                     rtmParam->ny, rtmParam->nz, rtmParam->nt, nProcesses);

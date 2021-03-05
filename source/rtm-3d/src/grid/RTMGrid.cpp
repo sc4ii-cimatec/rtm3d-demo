@@ -613,6 +613,7 @@ void RTMCube<RTMData_t, RTMDevPtr_t>::initBorders_HBC()
     ly = ny - 2 * blen;
     lz = nz - 2 * blen;
 
+    initBorders_ABC();
     initBorders_RBC();
 
     /* Upper cube with ABC (Dussaud 2008) */

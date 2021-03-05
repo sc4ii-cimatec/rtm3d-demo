@@ -7,7 +7,7 @@
 
 void RTMAcousticProcess::rtm(){
     try{
-        RTM_PRINT("Initializing RTM Acoustic Process...", true);
+        RTM_PRINT("Initializing RTM Acoustic Process... ", true);
         // init process limits and load input parameters
         initRTMProcess();
         // print input parameters

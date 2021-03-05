@@ -235,6 +235,10 @@ void RTMRBCKernel::rtmRBCBackward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &sho
             // update propagation function time report
             report->propagFuncTime += elapsed_s(t1, toc());
             report->propagFuncCounter++;
+
+            // join distributed PS and PR grids, if any.
+            joinDistributedPSGrids();
+            joinDistributedPRGrids();
 		
             // restore receiver energy
             defaultPlatform->rtmRestoreReceiverData(ppRcvGrid, rcvGrid, lt);
@@ -253,10 +257,6 @@ void RTMRBCKernel::rtmRBCBackward(RTMShotDescriptor<RTMData_t, RTMDevPtr_t> &sho
             }
             // swap receiver pointers
 			RTMGRID_SWAP(&pRcvGrid, &ppRcvGrid);
-            
-            // join distributed PS and PR grids, if any.
-            joinDistributedPSGrids();
-            joinDistributedPRGrids();
 			
             // print kernel progress
             printKernelProgress("+ RBC_BWD", sx, sy, sz, nt-it, nt, elapsed_s(t0,toc()));

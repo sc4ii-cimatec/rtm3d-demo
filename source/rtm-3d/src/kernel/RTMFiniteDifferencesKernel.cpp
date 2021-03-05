@@ -110,8 +110,8 @@ void RTMFiniteDifferencesKernel::rtmModel(RTMShotDescriptor<RTMData_t, RTMDevPtr
         RTMFPGAPlatform * fpgaPlatform = dynamic_cast<RTMFPGAPlatform *>(accPlatform);
         fpgaPlatform->rtmSeismicModeling(&shotDescriptor,stencil,rtmTaper,v2dt2Grid);
 #else
-        rtmAcousticFiniteDiffModeling(shotDescriptor, v2dt2Grid);
-        //rtmAcousticFiniteDiffModeling_RemoveDirectWave(shotDescriptor, v2dt2Grid);
+        //rtmAcousticFiniteDiffModeling(shotDescriptor, v2dt2Grid);
+        rtmAcousticFiniteDiffModeling_RemoveDirectWave(shotDescriptor, v2dt2Grid);
 #endif
 
         report->rtmModelingTime += elapsed_s(t0, toc());
@@ -191,6 +191,10 @@ void RTMFiniteDifferencesKernel::rtmAcousticFiniteDiffModeling(RTMShotDescriptor
             // apply source
             defaultPlatform->rtmApplySource(ppSrcGrid, shotDescriptor.getSource(), it);
 
+            // join all distributed PS grids, if any. 
+            // !!! MUST BE BEFORE SAVING RECEIVER DATA
+            joinDistributedPSGrids();
+
             // save reciever grid
             defaultPlatform->rtmSaveReceiverData(ppSrcGrid, rcvGrid, lt);
 
@@ -206,8 +210,6 @@ void RTMFiniteDifferencesKernel::rtmAcousticFiniteDiffModeling(RTMShotDescriptor
                 secGrid->appendTofile(snapshotsFile);
                 delete secGrid;
             }
-            // join all distributed PS grids, if any.
-            joinDistributedPSGrids();
             
             // print kernel progress
             printKernelProgress("+ RTM_MOD", sx, sy, sz, it, nt, elapsed_s(t0, toc()));
@@ -383,6 +385,10 @@ void RTMFiniteDifferencesKernel::rtmAcousticFiniteDiffModeling_RemoveDirectWave(
                 defaultPlatform->rtmApplySource(ppSrcGrid, shotDescriptor.getSource(), it);
                 defaultPlatform->rtmApplySource(ppRcvGrid, shotDescriptor.getSource(), it);
 
+                // join all distributed PS grids, if any. 
+                // !!! MUST BE BEFORE SAVING RECEIVER DATA
+                joinDistributedPSGrids();
+
                 // save reciever grid
                 defaultPlatform->rtmSaveReceiverData(ppSrcGrid, rcvGrid, lt);
                 defaultPlatform->rtmSaveReceiverData(ppRcvGrid, &filterRcvGrid, lt);
@@ -395,8 +401,6 @@ void RTMFiniteDifferencesKernel::rtmAcousticFiniteDiffModeling_RemoveDirectWave(
                     secGrid->appendTofile(snapshotsFile);
                     delete secGrid;
                 }
-                // join all distributed PS grids, if any.
-                joinDistributedPSGrids();
 
                 // print kernel progress
                 printKernelProgress("+ RTM_MOD", sx, sy, sz, it, nt, elapsed_s(t0, toc()));
