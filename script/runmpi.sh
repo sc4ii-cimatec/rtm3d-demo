@@ -20,23 +20,32 @@ fi
 if [[ -z "${JOBNAME}" ]]; then
   JOBNAME="3D-aRTM"
 fi
+if [[ -z "${ACCOUNT}" ]]; then
+  ACCOUNT="cenpes-lde"
+fi
 
 # input file
 inputJson=$1
 nprocs=$2
-build=$3
-reportdir=$4
+ntask=$3
+build=$4
+reportdir=$5
+acc=$6
+
 binfile=bin/RTM3D_MPI.bin
+if [ "$acc" == "gpu" ];then
+    binfile=bin/RTM3D_MPI_GPU.bin
+fi
 
 #build host
 if [ "$build" = "y" -o "$build" = "Y" ]; then
     rm $binfile > /dev/null 2>&1
     if [ "$build" = "Y" ]; then
         # clean build
-	    $rootdir/script/buildhost.sh "on" "off" "y"
+	    $rootdir/script/buildhost.sh "on" "$acc" "y"
     else
         # just build
-        $rootdir/script/buildhost.sh "on" "off" "n"
+        $rootdir/script/buildhost.sh "on" "$acc" "n"
     fi
 	if [ ! -f "$binfile" ]; then
 	    exit 1
@@ -47,8 +56,8 @@ fi
 OUTPUTFILE="$reportdir/job-output-NP$nprocs.log"
 # run
 export OMP_NUM_THREADS=72
-echo "> sbatch -p ${SPARTION} -J $JOBNAME --nodes $nprocs --ntasks-per-node=1\
+echo "> sbatch -p ${SPARTION} -A $ACCOUNT -J $JOBNAME --nodes $nprocs --ntasks-per-node=$ntask\
  --export='ALL' -o $OUTPUTFILE $rootdir/script/runjob.sh $binfile $inputJson"
-sbatch -p ${SPARTION} -J $JOBNAME --nodes $nprocs --ntasks-per-node=1 \
+sbatch -p ${SPARTION} -J $JOBNAME -A $ACCOUNT --nodes $nprocs --ntasks-per-node=$ntask \
 --export='ALL' -o $OUTPUTFILE $rootdir/script/runjob.sh $binfile $inputJson
 

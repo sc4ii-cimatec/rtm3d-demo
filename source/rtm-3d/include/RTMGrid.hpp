@@ -523,6 +523,7 @@ public:
     }
     /* Extends grid's borders in all directions */
     void extendBorders(uint32_t blength);
+    void extendBorders(uint32_t xblen, uint32_t yblen, uint32_t zblen);
     /* Removes grid's borders in all directions */
     void removeBorders(uint32_t blength);
     /* Fills borders values according to chosen Boundary Condition method*/

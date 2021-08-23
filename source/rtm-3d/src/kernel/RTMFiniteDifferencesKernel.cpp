@@ -110,8 +110,8 @@ void RTMFiniteDifferencesKernel::rtmModel(RTMShotDescriptor<RTMData_t, RTMDevPtr
         RTMFPGAPlatform * fpgaPlatform = dynamic_cast<RTMFPGAPlatform *>(accPlatform);
         fpgaPlatform->rtmSeismicModeling(&shotDescriptor,stencil,rtmTaper,v2dt2Grid);
 #else
-        //rtmAcousticFiniteDiffModeling(shotDescriptor, v2dt2Grid);
-        rtmAcousticFiniteDiffModeling_RemoveDirectWave(shotDescriptor, v2dt2Grid);
+        rtmAcousticFiniteDiffModeling(shotDescriptor, v2dt2Grid);
+        //rtmAcousticFiniteDiffModeling_RemoveDirectWave(shotDescriptor, v2dt2Grid);
 #endif
 
         report->rtmModelingTime += elapsed_s(t0, toc());

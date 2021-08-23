@@ -9,4 +9,5 @@ bin/
 *.xo
 *.log
 *.bin
+*.o
 

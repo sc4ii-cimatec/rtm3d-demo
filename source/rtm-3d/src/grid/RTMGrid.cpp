@@ -85,6 +85,46 @@ void RTMCube<RTMData_t, RTMDevPtr_t>::extendBorders(uint32_t blength)
     updateHostPtr();
 }
 
+
+template <>
+void RTMCube<RTMData_t, RTMDevPtr_t>::extendBorders(uint32_t xblen, 
+uint32_t yblen, uint32_t zblen )
+{
+
+    this->setMaxMin(); // sets max and min values before extendind
+    
+    size_t ix, iy, iz, kx, ky, kz;
+    size_t nx = getNX();
+    size_t ny = getNY();
+    size_t nz = getNZ();
+    size_t nxe = nx + 2 * xblen;
+    size_t nye = ny + 2 * yblen;
+    size_t nze = nz + 2 * zblen;
+    HostBuffer_t<RTMData_t> tmpGrid;
+    copy(getGridBuffer().begin(), getGridBuffer().end(), back_inserter(tmpGrid));
+    
+    
+    size_t new_length = nxe*nye*nze;
+    resize(nxe, nye, nze);
+    for (ix = xblen, kx = 0; ix < nxe - xblen; ix++, kx++)
+    {
+        for (iy = yblen, ky = 0; iy < nye - yblen; iy++, ky++)
+        {
+            for (iz = zblen, kz = 0; iz < nze - zblen; iz++, kz++)
+            {
+                size_t offset_old;
+                offset_old = kx*(ny*nz)+ (ky*nz) + kz;
+                set(tmpGrid.at(offset_old), ix, iy, iz);
+            }
+        }
+    }
+    setNX(nxe);
+    setNY(nye);
+    setNZ(nze);
+    // update device grid host pointer and length
+    updateHostPtr();
+}
+
 template <>
 void RTMCube<RTMData_t, RTMDevPtr_t>::removeBorders(uint32_t blength)
 {

@@ -7,6 +7,7 @@
 
 using namespace std;
 
+
 int main(int argc, char const *argv[])
 {
     if (argc<2){
@@ -45,3 +46,22 @@ int main(int argc, char const *argv[])
     }
     return EXIT_SUCCESS;
 }
+
+
+// int main(int argc, char const *argv[])
+// {
+//     string vpefile = "./data/velmodels/SEG-EAGE-1000x1000x1000/SegEAGSalt_1000x1000x1000.bin";
+//     cout << "VelModel Extension" << endl;
+
+
+//     RTMVelocityModel<RTMData_t,RTMDevPtr_t>* rtmVelModel = new RTMVelocityModel<RTMData_t,RTMDevPtr_t>(676, 676, 210,
+//                                                         "SEG-EAGE-1000", 
+//                                                         "./data/velmodels/SEG-EAGE-1000x1000x1000/SegEAGSalt_676x676x210.bin");
+
+//     cout << "Extending borders...." << endl;
+//     rtmVelModel->extendBorders(162, 162, 395);
+
+//     cout << "Saving to file..." << endl;
+//     rtmVelModel->saveToFile(vpefile);
+//     cout << "Finished" << endl;
+// }

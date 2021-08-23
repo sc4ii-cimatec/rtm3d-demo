@@ -13,7 +13,7 @@ endif
 GPUCC:=nvcc
 GPUCFLAGS:=  -O3 -w --ftz=false --prec-div=true --fmad=false -arch=$(GPU_ARCH)
 GPUDFLAGS:= -DRTM_ACC_GPU
-GPULDFLAGS := -lcudart -lcuda
+GPULDFLAGS := -lcudart #-lcuda
 GPULDIR := -L$(CUDA_ROOT)/lib64 -L/usr/lib/x86_64-linux-gnu/
 GPUIDIR:=-I$(CUDA_ROOT)/include -I"./include" -I"./kernel/gpu/"
 
@@ -43,7 +43,7 @@ ACC_GPU_KBUILD:
 ACC_GPU_FLAGS:
 	$(eval HOST_DFLAGS += "-DRTM_ACC_GPU")
 	$(eval HOST_LDIR += -L"$(CUDA_ROOT)/lib64" $(GPULDIR))
-	$(eval HOST_LDFLAGS += -lcudart -lcuda)
+	$(eval HOST_LDFLAGS += -lcudart)
 	$(eval HOST_IDIR += -I$(CUDA_ROOT)/include)
 	$(eval HOST_BIN_NAME:=$(HOST_BIN_NAME)_GPU)
 

@@ -5,12 +5,15 @@ help(){
     echo "> rundemo.sh [options]"
     echo "> Options: " 
     echo ">        --target=<fpga|gpu|cpu|mpi>"
+    echo ">        --acc=<fpga|gpu|off>"
     echo ">        --json=<input.json>"
     echo ">        --build=<y=build|Y=clean and build|n= don't build>"
-    echo ">        --nproc=N, where N is the number of MPI processes)"
+    echo ">        --nodes=N, where N is the number of nodes)"
+    echo ">        --ntask-per-node=N, where N is the number of MPI processes per node)"
     echo ">        --xclbin=<path_to_xclbin>."
     exit 1
 }
+
 
 create_modelfolders(){
     # check if output dir exists. If not, create it
@@ -51,7 +54,8 @@ create_modelfolders(){
 ## default vars
 target="cpu"
 acc="off"
-nprocs=1
+nnodes=1
+ntasks=1
 build="y"
 jsonPath=""
 runscript="script/runcpu.sh"
@@ -69,8 +73,14 @@ while [ $# -gt 0 ]; do
     --build=*)
       build="${1#*=}"
       ;;
-    --nproc=*)
-      nprocs="${1#*=}"
+    --acc=*)
+      acc="${1#*=}"
+      ;;
+    --nodes=*)
+      nnodes="${1#*=}"
+      ;;
+    --ntask-per-node=*)
+      ntasks="${1#*=}"
       ;;
     --xclbin=*)
       fpgakernel="${1#*=}"
@@ -95,7 +105,7 @@ elif [ "$target" = "fpga" ];then
     fi
 elif [ "$target" = "mpi" ];then
     runscript="script/runmpi.sh"
-    ./$runscript $jsonPath $nprocs $build $outdir_log
+    ./$runscript $jsonPath $nnodes $ntasks $build $outdir_log $acc
 else
     runscript="script/runcpu.sh"
     ./$runscript $jsonPath $build $outdir_log
